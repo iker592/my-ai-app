@@ -19,6 +19,11 @@ export default function Chat() {
 
   return (
     <div className="flex flex-col w-full max-w-md h-screen mx-auto">
+      {/* Site Temporarily Down Banner */}
+      <div className="bg-red-500 dark:bg-red-600 text-white px-4 py-3 text-center font-semibold">
+        Site Temporarily Down
+      </div>
+      
       <div ref={containerRef} className="flex-1 overflow-y-auto px-4 pt-24 pb-32">
       {messages.map(message => (
         <div key={message.id} className="mb-4">
@@ -70,15 +75,15 @@ export default function Chat() {
         className="fixed bottom-0 w-full max-w-md p-4 bg-white dark:bg-zinc-900 border-t border-zinc-300 dark:border-zinc-800"
         onSubmit={e => {
           e.preventDefault();
-          sendMessage({ text: input });
-          setInput('');
+          // Disabled - site temporarily down
         }}
       >
         <input
-          className="w-full p-2 border border-zinc-300 dark:border-zinc-800 rounded shadow-xl dark:bg-zinc-800"
+          className="w-full p-2 border border-zinc-300 dark:border-zinc-800 rounded shadow-xl dark:bg-zinc-800 bg-gray-200 dark:bg-gray-700 cursor-not-allowed"
           value={input}
-          placeholder="Say something..."
-          onChange={e => setInput(e.currentTarget.value)}
+          placeholder="Site temporarily down..."
+          onChange={() => {}} // Disabled
+          disabled
         />
       </form>
     </div>
