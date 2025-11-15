@@ -15,7 +15,7 @@ export default function Chat() {
             switch (part.type) {
               case 'text':
                 return <div key={`${message.id}-${i}`}>{part.text}</div>;
-              case 'tool-weather':
+              case 'tool-getResumeInfo':
                 return (
                   <pre key={`${message.id}-${i}`}>
                     {JSON.stringify(part, null, 2)}
