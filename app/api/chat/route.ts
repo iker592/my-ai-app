@@ -21,16 +21,16 @@ async function loadResume(): Promise<string> {
 const resume = await loadResume();
 
 const resumeTool = tool({
-  description: 'Search and retrieve information from the resume. ' +
-  'Use this tool to answer questions about the person, their experience, skills, ' +
-  'education, projects, or any other information from the resume.',
+  description: 'Get the complete resume content. After calling this tool, you MUST analyze ' +
+  'the resume and provide a helpful text response to answer the user\'s question.',
   inputSchema: z.object({
-    query: z.string().describe('The question or topic to search for in the resume'),
+    query: z.string().describe('What the user wants to know about the resume'),
   }),
   execute: async ({ query }) => {
+    // Return the resume content for Claude to analyze
     return {
-      resume: resume,
-      query: query,
+      content: resume,
+      instruction: `Please analyze this resume and answer the user's question: "${query}"`,
     };
   },
 });
@@ -38,16 +38,19 @@ const resumeTool = tool({
 export async function POST(req: Request) {
   const { messages } = await req.json();
 
-  // streamText automatically handles tool calls and streams the response
+  // streamText with stopWhen enables multi-step agent loop:
+  // Default stopWhen is stepCountIs(1) which only allows tool calls without text
+  // Use higher stepCountIs to allow tool call + text generation
   const result = streamText({
     model: anthropic('claude-haiku-4-5-20251001'),
-    system: 'You are a helpful assistant that answers questions about a resume. ' +
-    'When you call the getResumeInfo tool, analyze the resume content and provide a helpful answer to the user\'s question based on the resume information.',
+    system: 'You are a helpful assistant that answers questions about a professional resume. ' +
+    'Use the getResumeInfo tool to retrieve the resume content, then analyze it carefully ' +
+    'to provide detailed, helpful answers to user questions. Be concise and focus on relevant details.',
     messages: convertToModelMessages(messages),
     tools: {
       getResumeInfo: resumeTool,
     },
-    stopWhen: stepCountIs(2), // Allow tool call (step 1) + text response (step 2)
+    stopWhen: stepCountIs(5), // Allow multiple steps: tool calls + text generation
   });
 
   return result.toUIMessageStreamResponse();
