@@ -6,25 +6,23 @@ import ReactMarkdown from 'react-markdown';
 
 export default function Chat() {
   const [input, setInput] = useState('');
-  const { messages, sendMessage } = useChat();
+  const { messages, sendMessage, status } = useChat();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Check if currently processing (submitted or streaming)
+  const isLoading = status === 'submitted' || status === 'streaming';
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [messages]);
+  }, [messages, status]);
 
   return (
     <div className="flex flex-col w-full max-w-md h-screen mx-auto">
-      {/* Site Temporarily Down Banner */}
-      <div className="bg-red-500 dark:bg-red-600 text-white px-4 py-3 text-center font-semibold">
-        Site Temporarily Down
-      </div>
-      
-      <div ref={containerRef} className="flex-1 overflow-y-auto px-4 pt-24 pb-32">
+      <div ref={containerRef} className="flex-1 overflow-y-auto px-4 pt-4 pb-32">
       {messages.map(message => (
         <div key={message.id} className="mb-4">
           <div className="font-semibold mb-1">
@@ -75,15 +73,18 @@ export default function Chat() {
         className="fixed bottom-0 w-full max-w-md p-4 bg-white dark:bg-zinc-900 border-t border-zinc-300 dark:border-zinc-800"
         onSubmit={e => {
           e.preventDefault();
-          // Disabled - site temporarily down
+          if (input.trim()) {
+            sendMessage({ text: input });
+            setInput('');
+          }
         }}
       >
         <input
-          className="w-full p-2 border border-zinc-300 dark:border-zinc-800 rounded shadow-xl dark:bg-zinc-800 bg-gray-200 dark:bg-gray-700 cursor-not-allowed"
+          className="w-full p-2 border border-zinc-300 dark:border-zinc-800 rounded shadow-xl dark:bg-zinc-800"
           value={input}
-          placeholder="Site temporarily down..."
-          onChange={() => {}} // Disabled
-          disabled
+          placeholder="Ask me about the resume..."
+          onChange={e => setInput(e.target.value)}
+          disabled={isLoading}
         />
       </form>
     </div>
