@@ -1,5 +1,5 @@
 import { anthropic } from '@ai-sdk/anthropic';
-import { streamText, convertToModelMessages, tool } from 'ai';
+import { streamText, convertToModelMessages, tool, stepCountIs } from 'ai';
 import { z } from 'zod';
 
 import { readFile } from 'fs/promises';
@@ -47,6 +47,7 @@ export async function POST(req: Request) {
     tools: {
       getResumeInfo: resumeTool,
     },
+    stopWhen: stepCountIs(2), // Allow tool call (step 1) + text response (step 2)
   });
 
   return result.toUIMessageStreamResponse();
